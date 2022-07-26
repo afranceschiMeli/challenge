@@ -1,16 +1,17 @@
 package main
 
 import (
-	"challenge/v1/internal/myapi"
+	"challenge/v1/cmd/api/router"
+	"challenge/v1/internal/webapp/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	g := gin.Default()
-	a := myapi.NewMyApiController()
+	myApiController := http.NewMyApiController()
 
-	g.GET("/myapi", a.GetApi)
+	router.CreateRouter(g, myApiController)
 
 	g.Run()
 }
