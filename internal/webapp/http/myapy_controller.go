@@ -2,6 +2,7 @@ package http
 
 import (
 	"challenge/v1/internal/webapp"
+	"challenge/v1/pkg/coingecko"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,9 +15,24 @@ func NewMyApiController() webapp.MyApiController {
 }
 
 func (api *myApiController) GetApi(c *gin.Context) {
-	data, _ := c.GetQuery("data")
+	id := "bitcoin"
+	dto := &webapp.MyApiDto{}
+	response := coingecko.GetCoinData(id)
 
-	response := &webapp.MyApiDto{Data: data}
+	if response.Partial {
+		dto.Partial = true
+		dto.ID = id
+		c.JSON(206, dto)
+	} else {
+		buildResponse(response, dto)
+		c.JSON(200, dto)
+	}
 
-	c.JSON(200, response)
+}
+
+func buildResponse(resp *coingecko.CoinGeckoItem, dto *webapp.MyApiDto) {
+	dto.ID = resp.ID
+	dto.Partial = resp.Partial
+	dto.Content.Currency = "USD"
+	dto.Content.Price = resp.MarketData.CurrentPrice.Usd
 }
