@@ -16,23 +16,15 @@ func NewMyApiController() webapp.MyApiController {
 
 func (api *myApiController) GetApi(c *gin.Context) {
 	id := "bitcoin"
-	dto := &webapp.MyApiDto{}
-	response := coingecko.GetCoinData(id)
+	dto := &webapp.MyApiDto{ID: id, Partial: true}
+	content, err := coingecko.GetCoinData(id)
 
-	if response.Partial {
-		dto.Partial = true
-		dto.ID = id
+	if err != nil {
 		c.JSON(206, dto)
 	} else {
-		buildResponse(response, dto)
+		dto.Content = content
+		dto.Partial = false
 		c.JSON(200, dto)
 	}
 
-}
-
-func buildResponse(resp *coingecko.CoinGeckoItem, dto *webapp.MyApiDto) {
-	dto.ID = resp.ID
-	dto.Partial = resp.Partial
-	dto.Content.Currency = "USD"
-	dto.Content.Price = resp.MarketData.CurrentPrice.Usd
 }
